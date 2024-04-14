@@ -19,22 +19,40 @@ from sklearn.metrics import mean_squared_error, r2_score
 # Create a Streamlit app with a dropdown bar
 st.title("NFL Data and Analysis")
 
+      
+def date_selector():
+    st.subheader('Please select a year')
+    selected_year = st.selectbox('Select a year', list(range(2010, 2024)))
+    try:
+        st.write('You selected', selected_year)
+        df_date = nfl.import_pbp_data([selected_year])
+        return df_date
+    except ValueError:
+        st.error('Sorry, the year you selected has no data or is returning an error. Please try a different year.')
+    except NameError:
+        st.error('Sorry, the year you selected has no data or is returning an error. Please try a different year.') 
+
+# Call date_selector function to get the DataFrame for the selected year
+df_date = date_selector()
+
+
 # Prompt the user to select a question
-selected_question = st.selectbox("Select a question", ["Question 1 - what are the NFL 1st down EPA rankings", 
+st.subheader("Select a question")
+selected_question = st.selectbox("", ["Question 1 - what are the NFL 1st down EPA rankings", 
                                                        "Question 2 - what are the NFL 1st and 2nd down EPA rankings", 
                                                        "Question 3 - can you show me a game-by-game list of offensive EPA vs turnovers and points score?",
                                                        "Question 4 - Please show me a simple Regression comparing EPA and Points Scored"])
 
 # Load data for the specified year (hardcoded as 2023)
-df_2023 = nfl.import_pbp_data([2023])
-df_2023 = df_2023[df_2023["season_type"] == "REG"]  # Filter to regular season
-df_2023 = df_2023[(df_2023['pass'] == 1) | (df_2023['rush'] == 1)]  # Remove plays with only one team on the field
-df_2023 = df_2023.dropna(subset=['epa', 'posteam', 'defteam'])  # Remove plays without EPA, possession team, or defense team
+#df_2023 = nfl.import_pbp_data([2023])
+df_date = df_date[df_date["season_type"] == "REG"]  # Filter to regular season
+df_date = df_date[(df_date['pass'] == 1) | (df_date['rush'] == 1)]  # Remove plays with only one team on the field
+df_date = df_date.dropna(subset=['epa', 'posteam', 'defteam'])  # Remove plays without EPA, possession team, or defense team
 
 # Check the selected question and display the corresponding data
 if selected_question == "Question 1 - what are the NFL 1st down EPA rankings":
     # Calculate mean EPA for down 1
-    mean_epa_down1 = df_2023[df_2023['down'] == 1].groupby('posteam')['epa'].mean().reset_index()
+    mean_epa_down1 = df_date[df_date['down'] == 1].groupby('posteam')['epa'].mean().reset_index()
     mean_epa_down1.columns = ['Team', 'First Down EPA']
     mean_epa_down1['Rank'] = mean_epa_down1['First Down EPA'].rank(ascending=False, method='min')
     mean_epa_down1 = mean_epa_down1.sort_values('First Down EPA', ascending=False)
@@ -42,7 +60,7 @@ if selected_question == "Question 1 - what are the NFL 1st down EPA rankings":
     
 elif selected_question == "Question 2 - what are the NFL 1st and 2nd down EPA rankings":
     #mean epa down 1 and 2
-    mean_epa_down1and2 = df_2023[(df_2023['down'].isin([1,2]))].groupby('posteam')['epa'].mean().reset_index().rename(columns = {'posteam':'Team', 'epa' : 'EPA Downs One and Two'}) 
+    mean_epa_down1and2 = df_date[(df_date['down'].isin([1,2]))].groupby('posteam')['epa'].mean().reset_index().rename(columns = {'posteam':'Team', 'epa' : 'EPA Downs One and Two'}) 
     mean_epa_down1and2['Rank'] = mean_epa_down1and2['EPA Downs One and Two'].rank(ascending=False, method = 'min')
     mean_epa_down1and2[['Rank', 'Team', 'EPA Downs One and Two']]
     mean_epa_down1and2.sort_values('EPA Downs One and Two', ascending = False)
@@ -50,7 +68,7 @@ elif selected_question == "Question 2 - what are the NFL 1st and 2nd down EPA ra
     
 elif selected_question == "Question 3 - can you show me a game-by-game list of offensive EPA vs turnovers and points score?":
     # Group by 'game_id', 'home_team', 'posteam', and sum 'fumble_lost' and 'interception'
-    grouped_df_home = df_2023.groupby(['game_id', 'home_team', 'home_score', 'posteam']).agg({
+    grouped_df_home = df_date.groupby(['game_id', 'home_team', 'home_score', 'posteam']).agg({
         'epa': 'mean',
         'fumble_lost': 'sum',
         'interception': 'sum'
@@ -68,7 +86,7 @@ elif selected_question == "Question 3 - can you show me a game-by-game list of o
     # Reset the index after filtering
     filtered_df_home.reset_index(drop=True, inplace=True)
 
-    grouped_df_away = df_2023.groupby(['game_id', 'away_team', 'away_score', 'posteam']).agg({
+    grouped_df_away = df_date.groupby(['game_id', 'away_team', 'away_score', 'posteam']).agg({
     'epa': 'mean',
     'fumble_lost': 'sum',
     'interception': 'sum'
@@ -101,7 +119,7 @@ elif selected_question == "Question 3 - can you show me a game-by-game list of o
     st.write(df_consolidated_epa_score_combined)
 
 elif selected_question == "Question 4 - Please show me a simple Regression comparing EPA and Points Scored":
-    grouped_df_home = df_2023.groupby(['game_id', 'home_team', 'home_score', 'posteam']).agg({
+    grouped_df_home = df_date.groupby(['game_id', 'home_team', 'home_score', 'posteam']).agg({
     'epa': 'mean',
     'fumble_lost': 'sum',
     'interception': 'sum'
@@ -119,7 +137,7 @@ elif selected_question == "Question 4 - Please show me a simple Regression compa
     # Reset the index after filtering
     filtered_df_home.reset_index(drop=True, inplace=True)
     
-    grouped_df_away = df_2023.groupby(['game_id', 'away_team', 'away_score', 'posteam']).agg({
+    grouped_df_away = df_date.groupby(['game_id', 'away_team', 'away_score', 'posteam']).agg({
     'epa': 'mean',
     'fumble_lost': 'sum',
     'interception': 'sum'
