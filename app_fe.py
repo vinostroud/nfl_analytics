@@ -27,10 +27,8 @@ def date_selector():
         st.write('You selected', selected_year)
         df_date = nfl.import_pbp_data([selected_year])
         return df_date
-    except ValueError:
-        st.error('Sorry, the year you selected has no data or is returning an error. Please try a different year.')
-    except NameError:
-        st.error('Sorry, the year you selected has no data or is returning an error. Please try a different year.') 
+    except (ValueError, NameError):
+        st.error('Sorry, the year you selected has no data or is returning an error. Please try a different year.')  
 
 # Call date_selector function to get the DataFrame for the selected year
 df_date = date_selector()
