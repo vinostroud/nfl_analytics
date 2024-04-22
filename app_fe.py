@@ -1,7 +1,18 @@
-
-import streamlit as st
+import streamlit as st 
+import numpy as np
+import pathlib
+import pandas as pd
+import nfl_data_py as nfl
+import os
+import urllib.request
 import matplotlib.pyplot as plt
-from analytics_py import load_data, get_mean_epa_down1, get_mean_epa_down1and2, get_game_by_game_data, train_regression_model
+import plotly.graph_objects as go
+import seaborn as sns
+from matplotlib.offsetbox import AnnotationBbox, OffsetImage
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
 
 
 
@@ -24,30 +35,6 @@ df_date = date_selector()
 
 
 # Prompt the user to select a question
-3-re-organize-code-into-multiple-files-to-support-easier-scaling-readibility
-selected_question = st.selectbox("Select a question", [
-    "Question 1 - what are the NFL 1st down EPA rankings",
-    "Question 2 - what are the NFL 1st and 2nd down EPA rankings",
-    "Question 3 - can you show me a game-by-game list of offensive EPA vs turnovers and points score?",
-    "Question 4 - Please show me a simple Regression comparing EPA and Points Scored"
-])
-
-# Load data
-df_2023 = load_data()
-
-# Check the selected question and display the corresponding data
-if selected_question == "Question 1 - what are the NFL 1st down EPA rankings":
-    mean_epa_down1 = get_mean_epa_down1(df_2023)
-    st.write(mean_epa_down1)
-    
-elif selected_question == "Question 2 - what are the NFL 1st and 2nd down EPA rankings":
-    mean_epa_down1and2 = get_mean_epa_down1and2(df_2023)
-    st.write(mean_epa_down1and2)    
-    
-elif selected_question == "Question 3 - can you show me a game-by-game list of offensive EPA vs turnovers and points score?":
-    df_consolidated_epa_score_combined = get_game_by_game_data(df_2023)
-    st.write(df_consolidated_epa_score_combined)
-
 st.subheader("Select a question")
 selected_question = st.selectbox("", ["Question 1 - what are the NFL 1st down EPA rankings", 
                                                        "Question 2 - what are the NFL 1st and 2nd down EPA rankings", 
@@ -165,3 +152,48 @@ elif selected_question == "Question 4 - Please show me a simple Regression compa
 
     # Reset the index after filtering
     filtered_df_away.reset_index(drop=True, inplace=True)
+    
+    df_consolidated_epa_score_away = filtered_df_away.rename(columns={'game_id': 'Game ID', 'Away Team': 'Team', 'Away Team EPA': 'EPA', 'Away Team turnovers' : 'Turnovers', 'Away Team Score': 'Score'}).reset_index(drop=True)
+
+    df_consolidated_epa_score_home = filtered_df_home.rename(columns={'game_id': 'Game ID', 'Home Team': 'Team', 'Home Team EPA': 'EPA', 'Home Team turnovers' : 'Turnovers', 'Home Team Score': 'Score'}).reset_index(drop=True)
+
+    df_consolidated_epa_score_combined = pd.concat([df_consolidated_epa_score_away, df_consolidated_epa_score_home], axis=0)
+
+    # Reset the index if you want consecutive integers as the index
+    df_consolidated_epa_score_combined.reset_index(drop=True, inplace=True)
+
+
+    x_epa = df_consolidated_epa_score_combined['EPA']  # Features
+    y_score = df_consolidated_epa_score_combined['Score']  # Target variable  
+    
+    x_epa_train = x_epa[:-100]
+    x_epa_test = x_epa[-400:]
+
+    y_score_train = y_score[:-100]
+    y_score_test = y_score[-400:]
+    x_epa_train = np.array(x_epa_train).reshape(-1, 1)
+    x_epa_test = np.array(x_epa_test).reshape(-1, 1)
+    # Train the linear regression model
+    reg = LinearRegression()
+    reg.fit(x_epa_train, y_score_train)
+    train_score = reg.score(x_epa_train, y_score_train)
+    test_score = reg.score(x_epa_test, y_score_test)
+    score_y_pred = reg.predict(x_epa_test)
+    
+    sfig, ax = plt.subplots()
+    ax.scatter(x_epa_test, y_score_test, color="black", label='Actual')
+    ax.plot(x_epa_test, score_y_pred, color="blue", linewidth=3, label='Predicted')
+
+    # Set x and y labels
+    ax.set_xlabel('EPA')
+    ax.set_ylabel('Score')
+
+    # Rotate x-axis labels if needed
+    plt.xticks(rotation=45)
+
+    # Add legend
+    ax.legend()
+
+    # Show plot
+    st.pyplot(sfig)
+    
