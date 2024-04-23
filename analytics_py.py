@@ -9,12 +9,13 @@ import matplotlib.pyplot as plt
 
 
 
-def load_data():
-    df_2023 = nfl.import_pbp_data([2023])
-    df_2023 = df_2023[df_2023["season_type"] == "REG"]
-    df_2023 = df_2023[(df_2023['pass'] == 1) | (df_2023['rush'] == 1)]
-    df_2023 = df_2023.dropna(subset=['epa', 'posteam', 'defteam'])
-    return df_2023
+def load_data(df_year: int):
+    df = nfl.import_pbp_data([df_year])
+    df = df[df["season_type"] == "REG"]
+    df = df[(df['pass'] == 1) | (df['rush'] == 1)]
+    df = df.dropna(subset=['epa', 'posteam', 'defteam'])
+    return df
+
 
 def get_mean_epa_down1(df):
     mean_epa_down1 = df[df['down'] == 1].groupby('posteam')['epa'].mean().reset_index()
@@ -82,6 +83,8 @@ def get_game_by_game_data(df):
     df_consolidated_epa_score_combined.reset_index(drop=True, inplace=True)
     
     return df_consolidated_epa_score_combined 
+
+
 
 def train_regression_model(df):
     grouped_df_home = df.groupby(['game_id', 'home_team', 'home_score', 'posteam']).agg({
