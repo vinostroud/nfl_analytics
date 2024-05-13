@@ -24,7 +24,6 @@ def date_selector():
     selected_year = st.selectbox('Select a year', list(range(2010, 2024)))
     try:
         st.write('You selected', selected_year)
-        #df_date = nfl.import_pbp_data([selected_year])
         return selected_year
     except (ValueError, NameError):
         st.error('Sorry, the year you selected has no data or is returning an error. Please try a different year.')  
