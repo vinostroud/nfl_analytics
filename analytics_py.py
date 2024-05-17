@@ -41,7 +41,6 @@ def get_mean_epa_down1and2(df):
         .reset_index(drop=True)
     )
 
-
 def get_game_by_game_data(df):
     grouped_df_home = (
         df.groupby(['game_id', 'home_team', 'home_score', 'posteam'])
@@ -96,60 +95,45 @@ def get_game_by_game_data(df):
     
     return df_consolidated_epa_score_combined 
 
-#I still need to improve this
 
-def train_regression_model(df):
-    grouped_df_home = df.groupby(['game_id', 'home_team', 'home_score', 'posteam']).agg({
-        'epa': 'mean',
-        'fumble_lost': 'sum',
-        'interception': 'sum'
-    }).reset_index().rename(columns={'game_id': 'Game ID', 'home_team': 'Home Team', 'epa': 'Home Team EPA', 'home_score': 'Home Team Score'})
 
-    grouped_df_home['Home Team turnovers'] = grouped_df_home['fumble_lost'] + grouped_df_home['interception']
+def prepare_data(df):
+    def process_team_data(df, team_col, score_col):
+        grouped_df = df.groupby(['game_id', team_col, score_col, 'posteam']).agg({
+            'epa': 'mean',
+            'fumble_lost': 'sum',
+            'interception': 'sum'
+        }).reset_index().rename(columns={
+            'game_id': 'Game ID', 
+            team_col: 'Team', 
+            'epa': 'EPA', 
+            score_col: 'Score'
+        })
 
-    filtered_df_home = grouped_df_home[grouped_df_home['Home Team'] == grouped_df_home['posteam']].copy()
+        grouped_df['Turnovers'] = grouped_df['fumble_lost'] + grouped_df['interception']
+        filtered_df = grouped_df[grouped_df['Team'] == grouped_df['posteam']].copy()
+        filtered_df = filtered_df[['Game ID', 'Team', 'EPA', 'Turnovers', 'Score']]
+        filtered_df.reset_index(drop=True, inplace=True)
+        return filtered_df
 
-    filtered_df_home = filtered_df_home[['Game ID', 'Home Team', 'Home Team EPA', 'Home Team turnovers', 'Home Team Score']]
-
-    filtered_df_home.reset_index(drop=True, inplace=True)
+    home_data = process_team_data(df, 'home_team', 'home_score')
+    away_data = process_team_data(df, 'away_team', 'away_score')
     
-    grouped_df_away = df.groupby(['game_id', 'away_team', 'away_score', 'posteam']).agg({
-        'epa': 'mean',
-        'fumble_lost': 'sum',
-        'interception': 'sum'
-    }).reset_index().rename(columns={'game_id': 'Game ID', 'away_team': 'Away Team', 'epa': 'Away Team EPA','away_score' : 'Away Team Score'})
+    df_consolidated = pd.concat([home_data, away_data], axis=0).reset_index(drop=True)
+    return df_consolidated
 
-    grouped_df_away['Away Team turnovers'] = grouped_df_away['fumble_lost'] + grouped_df_away['interception']
-
-    filtered_df_away = grouped_df_away[grouped_df_away['Away Team'] == grouped_df_away['posteam']].copy()
-
-    filtered_df_away = filtered_df_away[['Game ID', 'Away Team', 'Away Team EPA', 'Away Team turnovers', 'Away Team Score']]
-
-    filtered_df_away.reset_index(drop=True, inplace=True)
+def train_and_plot_regression(df_consolidated):
+    x_epa = df_consolidated['EPA']
+    y_score = df_consolidated['Score']
     
-    df_consolidated_epa_score_away = filtered_df_away.rename(columns={'game_id': 'Game ID', 'Away Team': 'Team', 'Away Team EPA': 'EPA', 'Away Team turnovers' : 'Turnovers', 'Away Team Score': 'Score'}).reset_index(drop=True)
-
-    df_consolidated_epa_score_home = filtered_df_home.rename(columns={'game_id': 'Game ID', 'Home Team': 'Team', 'Home Team EPA': 'EPA', 'Home Team turnovers' : 'Turnovers', 'Home Team Score': 'Score'}).reset_index(drop=True)
-
-    df_consolidated_epa_score_combined = pd.concat([df_consolidated_epa_score_away, df_consolidated_epa_score_home], axis=0)
-
-    df_consolidated_epa_score_combined.reset_index(drop=True, inplace=True)
-
-
-    x_epa = df_consolidated_epa_score_combined['EPA']  # Features
-    y_score = df_consolidated_epa_score_combined['Score']  # Target variable  
-    
-    x_epa_train = x_epa[:-100]
-    x_epa_test = x_epa[-400:]
-
+    x_epa_train = np.array(x_epa[:-100]).reshape(-1, 1)
+    x_epa_test = np.array(x_epa[-400:]).reshape(-1, 1)
     y_score_train = y_score[:-100]
     y_score_test = y_score[-400:]
-    x_epa_train = np.array(x_epa_train).reshape(-1, 1)
-    x_epa_test = np.array(x_epa_test).reshape(-1, 1)
     
-    # Train the linear regression model
     reg = LinearRegression()
     reg.fit(x_epa_train, y_score_train)
+    
     train_score = reg.score(x_epa_train, y_score_train)
     test_score = reg.score(x_epa_test, y_score_test)
     score_y_pred = reg.predict(x_epa_test)
@@ -157,16 +141,14 @@ def train_regression_model(df):
     sfig, ax = plt.subplots()
     ax.scatter(x_epa_test, y_score_test, color="black", label='Actual')
     ax.plot(x_epa_test, score_y_pred, color="blue", linewidth=3, label='Predicted')
-
+    
     ax.set_xlabel('EPA')
     ax.set_ylabel('Score')
-
-  
     plt.xticks(rotation=45)
-
-    
     ax.legend()
     
-    return sfig  
+    return sfig
+
+
 
     

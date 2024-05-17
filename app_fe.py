@@ -12,7 +12,7 @@ from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
-from analytics_py import load_data, get_mean_epa_down1, get_mean_epa_down1and2, get_game_by_game_data, train_regression_model
+from analytics_py import load_data, get_mean_epa_down1, get_mean_epa_down1and2, get_game_by_game_data, prepare_data, train_and_plot_regression   
 
 
 # Create a Streamlit app with a dropdown bar
@@ -43,22 +43,23 @@ selected_question = st.selectbox("", ["Question 1 - what are the NFL 1st down EP
 
 df = load_data(df_year)
 
-# Check the selected question and display the corresponding data
+#Questions that map to functions in analytics_py.py
 if selected_question == "Question 1 - what are the NFL 1st down EPA rankings":
     mean_epa_down1 = get_mean_epa_down1(df)
     st.write(mean_epa_down1)
-    
-    
+        
 elif selected_question == "Question 2 - what are the NFL 1st and 2nd down EPA rankings":
     mean_epa_down1and2 = get_mean_epa_down1and2(df)
     st.write(mean_epa_down1and2)   
 
-#Note to self -- need to fix    
+
 elif selected_question == "Question 3 - can you show me a game-by-game list of offensive EPA vs turnovers and points score?":
     df_consolidated_epa_score_combined = get_game_by_game_data(df)
     st.write(df_consolidated_epa_score_combined)
 
-#note to self -- need to fix this
 elif selected_question == "Question 4 - Please show me a simple Regression comparing EPA and Points Scored":
-    train_regression_model(df)
+    df_consolidated = prepare_data(df)
+    sfig = train_and_plot_regression(df_consolidated)
+    st.pyplot(sfig)
+    
     
