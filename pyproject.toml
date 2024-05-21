@@ -7,7 +7,7 @@ license = "MIT License"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "3.12.3"
+python = "3.12.1"
 pandas = "^2.2.0"
 nfl-data-py = {git = "https://github.com/cooperdff/nfl_data_py"}
 matplotlib = "^3.8.3"
