@@ -12,7 +12,7 @@ from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
-from analytics_py import load_data, get_mean_epa_down1, get_mean_epa_down1and2, get_game_by_game_data, prepare_data, train_and_plot_regression   
+from apps.analytics_py import load_data, get_mean_epa_down1, get_mean_epa_down1and2, get_game_by_game_data, prepare_data, train_and_plot_regression   
 
 
 # Create a Streamlit app with a dropdown bar
