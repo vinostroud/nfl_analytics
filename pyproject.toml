@@ -25,6 +25,9 @@ nbdev = "^2.3.13"
 pytest = "^8.2.0"
 
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
