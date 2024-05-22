@@ -5,9 +5,10 @@ description = "Various analysis of nfl data using nfl_data_py"
 authors = ["vinostroud <krstrouse@gmail.com>"]
 license = "MIT License"
 readme = "README.md"
+packages = [{include = "app_fe", from = "src"}]
 
 [tool.poetry.dependencies]
-python = "3.12.1"
+python = "^3.12.1"
 pandas = "^2.2.0"
 nfl-data-py = {git = "https://github.com/cooperdff/nfl_data_py"}
 matplotlib = "^3.8.3"
@@ -21,8 +22,21 @@ streamlit = "^1.31.1"
 pathlib = "^1.0.1"
 ipykernel = "^6.29.2"
 nbdev = "^2.3.13"
+pytest = "^8.2.0"
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dev-dependencies]
+pytest-mock = "^3.0.0"
+
+[tool.poetry.scripts]
+date_selector = "apps.app_fe:date_selector"
+
+[tool.pytest.ini_options]
+pythonpath = "NFL_stats"
