@@ -50,18 +50,27 @@ def sample_data():
 @pytest.fixture
 def mock_data():
     return pd.DataFrame({
-        'down': [1, 1, 1, 1, 1],
-        'posteam': ['TeamA', 'TeamA', 'TeamB', 'TeamA', 'TeamB'],
-        'epa': [0.5, 0.7, 0.3, 0.6, 0.4]
+        'down': [1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
+        'posteam': ['TeamA', 'TeamA', 'TeamB', 'TeamA', 'TeamB', 'TeamA', 'TeamB', 'TeamA', 'TeamB', 'TeamA', 'TeamB'],
+        'epa': [0.59, 0.27, 0.39, 0.12, 0.51, 0.51, 0.33, -0.1, 0.54, 0.57, 0.25]
     })
 
 @pytest.fixture
-def expected_output():
+def expected_output_down1():
     return pd.DataFrame({
-        'Team': ['TeamA', 'TeamB'],
-        'First Down EPA': [0.6, 0.35],
+        'Team': ['TeamB', 'TeamA'],
+        'First Down EPA': [0.45, 0.32666666666666666],
         'Rank': [1.0, 2.0]
     })
+
+@pytest.fixture
+def expected_output_down1and2():
+    return pd.DataFrame({
+        'Team': ['TeamB', 'TeamA'],
+        'EPA Downs One and Two': [0.404, 0.32666666666666666],
+        'Rank': [1.0, 2.0]        
+    })
+
 
 def test_load_data(sample_data):
     '''Test that load_data returns a DataFrame'''
@@ -71,9 +80,16 @@ def test_load_data(sample_data):
         assert isinstance(test_df, pd.DataFrame), "The output is not a DataFrame"
         mock_import.assert_called_once_with([df_year])
 
-def test_get_mean_epa_down1(mock_data, expected_output):
-    result = get_mean_epa_down1(mock_data)
-    pd.testing.assert_frame_equal(result, expected_output)
+def test_get_mean_epa_down1(mock_data, expected_output_down1):
+    result = get_mean_epa_down1(mock_data).sort_values(by='First Down EPA', ascending=False).reset_index(drop=True)
+    expected_output_down1 = expected_output_down1.sort_values(by='First Down EPA', ascending=False).reset_index(drop=True)
+    pd.testing.assert_frame_equal(result, expected_output_down1)
+
+
+def test_get_mean_epa_down1and2(mock_data, expected_output_down1and2):
+    result = get_mean_epa_down1and2(mock_data).sort_values(by='EPA Downs One and Two', ascending=False).reset_index(drop=True)
+    expected_output_down1and2 = expected_output_down1and2.sort_values(by='EPA Downs One and Two', ascending=False).reset_index(drop=True)
+    pd.testing.assert_frame_equal(result, expected_output_down1and2)
 
 
 
