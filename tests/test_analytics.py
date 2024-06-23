@@ -80,10 +80,12 @@ def test_load_data(sample_data):
         assert isinstance(test_df, pd.DataFrame), "The output is not a DataFrame"
         mock_import.assert_called_once_with([df_year])
 
+
 def test_get_mean_epa_down1(mock_data, expected_output_down1):
     result = get_mean_epa_down1(mock_data).sort_values(by='First Down EPA', ascending=False).reset_index(drop=True)
     expected_output_down1 = expected_output_down1.sort_values(by='First Down EPA', ascending=False).reset_index(drop=True)
     pd.testing.assert_frame_equal(result, expected_output_down1)
+
 
 
 def test_get_mean_epa_down1and2(mock_data, expected_output_down1and2):
@@ -92,13 +94,40 @@ def test_get_mean_epa_down1and2(mock_data, expected_output_down1and2):
     pd.testing.assert_frame_equal(result, expected_output_down1and2)
 
 
+#Placeholder for Test 5 - get_game_by_game_data
+
+@pytest.fixture
+def sample_data_five():
+    return pd.DataFrame({
+        'game_id': ['2023_01_ABC_XYZ', '2023_01_ABC_XYZ', '2023_01_ABC_XYZ', '2023_01_ABC_XYZ', '2023_01_ABC_XYZ'],
+        'home_team': ['ABC', 'ABC', 'ABC', 'ABC', 'ABC'],
+        'home_score': [10, 10, 10, 10, 10],
+        'away_team': ['XYZ', 'XYZ', 'XYZ', 'XYZ', 'XYZ'], 
+        'away_score': [17, 17, 17, 17, 17],
+        'posteam': ['ABC', 'ABC', 'ABC', 'XYZ', 'XYZ'],
+        'fumble_lost': [0, 0, 1, 1, 0],
+        'interception': [1, 0, 0, 0, 1],
+        'epa': [-.3, .25, -.2, .1, -.1]
+    })
+
+
+def test_get_game_by_game_data(sample_data_five):
+    expected_output = pd.DataFrame({
+        'Game ID': ['2023_01_ABC_XYZ', '2023_01_ABC_XYZ'],
+        'Team': ['XYZ', 'ABC'],
+        'EPA': [0.0, -0.08333333333333333],
+        'Turnovers': [2, 2],
+        'Score': [17, 10]
+    })
+    result = get_game_by_game_data(sample_data_five)
+    pd.testing.assert_frame_equal(result, expected_output)
+
+
+
+
 
 '''
-Placeholder for Test 4 - getmeanepadown1and2
-
-Placeholder for Test 5 - get_game_by_game_data
-
-Placeholder for Test 6 - repare_data
+Placeholder for Test 6 - prepare_data
 
 I don't think a test is needed to plot the chart.
 '''
