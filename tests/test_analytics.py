@@ -124,10 +124,15 @@ def test_get_game_by_game_data(sample_data_five):
 
 
 
+def test_prepare_data(sample_data_five):
+    expected_output = pd.DataFrame({
+        'Game ID': ['2023_01_ABC_XYZ', '2023_01_ABC_XYZ'],
+        'Team': ['ABC', 'XYZ'],
+        'EPA': [-0.08333333333333333, 0.0],
+        'Turnovers': [2, 2],
+        'Score': [10, 17]
+    })
+    result = prepare_data(sample_data_five)
+    pd.testing.assert_frame_equal(result, expected_output)
+    
 
-
-'''
-Placeholder for Test 6 - prepare_data
-
-I don't think a test is needed to plot the chart.
-'''
