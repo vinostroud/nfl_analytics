@@ -1,18 +1,9 @@
 import pytest
 from unittest.mock import patch
-import time
 
 import pandas as pd
 import pandera as pa
-start = time.time()
-
 import nfl_data_py as nfl
-
-end = time.time()
-
-print(end - start)
-print("it took to load nfl")
-
 from pandera import Column
 
 from src.app_fe import load_data, get_mean_epa_down1, get_mean_epa_down1and2, get_game_by_game_data, prepare_data
