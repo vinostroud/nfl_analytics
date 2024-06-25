@@ -1,22 +1,28 @@
 import pytest
-from src.app_fe import date_selector, load_data, get_mean_epa_down1, get_mean_epa_down1and2, get_game_by_game_data, prepare_data, train_and_plot_regression
-from streamlit.testing.v1 import AppTest
-from unittest.mock import patch, MagicMock
-import streamlit as st
+from unittest.mock import patch
+import time
 
 import pandas as pd
 import pandera as pa
+start = time.time()
+
 import nfl_data_py as nfl
-from pandera import Column, DataFrameSchema
-from pandas import DataFrame
-from pandas.testing import assert_frame_equal
+
+end = time.time()
+
+print(end - start)
+print("it took to load nfl")
+
+from pandera import Column
+
+from src.app_fe import load_data, get_mean_epa_down1, get_mean_epa_down1and2, get_game_by_game_data, prepare_data
 
 #Test 1: using pandera to validate the columns I call are in nfl_data_py
 
 df_year = 2023 #I hardcoded this to simplify the test. Perhaps this is not right in context of the test I am running?
 
 def test_validate_columns():
-    df = nfl.import_pbp_data([df_year])
+    df = nfl.import_pbp_data([df_year])  # cache=True -- did not work
     df = df.dropna()
     schema = pa.DataFrameSchema(
         {
@@ -29,10 +35,11 @@ def test_validate_columns():
         }
     )
     try:
+        breakpoint()
         schema.validate(df)
     except pa.errors.SchemaError as e:
         pytest.fail(f"Schema validation failed: {e}")
-    
+
 
 
 
@@ -68,7 +75,7 @@ def expected_output_down1and2():
     return pd.DataFrame({
         'Team': ['TeamB', 'TeamA'],
         'EPA Downs One and Two': [0.404, 0.32666666666666666],
-        'Rank': [1.0, 2.0]        
+        'Rank': [1.0, 2.0]
     })
 
 
@@ -102,7 +109,7 @@ def sample_data_five():
         'game_id': ['2023_01_ABC_XYZ', '2023_01_ABC_XYZ', '2023_01_ABC_XYZ', '2023_01_ABC_XYZ', '2023_01_ABC_XYZ'],
         'home_team': ['ABC', 'ABC', 'ABC', 'ABC', 'ABC'],
         'home_score': [10, 10, 10, 10, 10],
-        'away_team': ['XYZ', 'XYZ', 'XYZ', 'XYZ', 'XYZ'], 
+        'away_team': ['XYZ', 'XYZ', 'XYZ', 'XYZ', 'XYZ'],
         'away_score': [17, 17, 17, 17, 17],
         'posteam': ['ABC', 'ABC', 'ABC', 'XYZ', 'XYZ'],
         'fumble_lost': [0, 0, 1, 1, 0],
@@ -134,5 +141,5 @@ def test_prepare_data(sample_data_five):
     })
     result = prepare_data(sample_data_five)
     pd.testing.assert_frame_equal(result, expected_output)
-    
+
 

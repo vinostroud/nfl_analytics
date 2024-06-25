@@ -3,7 +3,6 @@
 import numpy as np
 import pandas as pd
 import nfl_data_py as nfl
-from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 
@@ -33,7 +32,7 @@ def get_mean_epa_down1and2(df):
     return (
         df[df['down'].isin([1, 2])]
         .groupby('posteam')['epa']
-        .mean() 
+        .mean()
         .reset_index()
         .rename(columns={'posteam': 'Team', 'epa': 'EPA Downs One and Two'})
         .assign(Rank=lambda x: x['EPA Downs One and Two'].rank(ascending=False, method='min'))
@@ -51,14 +50,14 @@ def get_game_by_game_data(df):
     .reset_index()
     .rename(columns={'game_id': 'Game ID', 'home_team': 'Home Team', 'epa': 'Home Team EPA', 'home_score': 'Home Team Score'})
     )
-        
+
     filtered_df_home = (
         grouped_df_home.assign(**{'Home Team turnovers': lambda x: x['fumble_lost'] + x['interception']})
         [grouped_df_home['Home Team'] == grouped_df_home['posteam']]
         [['Game ID', 'Home Team', 'Home Team EPA', 'Home Team turnovers', 'Home Team Score']]
         .reset_index(drop=True)
     )
-        
+
     grouped_df_away = (
         df.groupby(['game_id', 'away_team', 'away_score', 'posteam'])
         .agg({
@@ -69,15 +68,15 @@ def get_game_by_game_data(df):
         .rename(columns={'game_id': 'Game ID', 'away_team': 'Away Team', 'epa': 'Away Team EPA','away_score' : 'Away Team Score'})
         .assign(**{'Away Team turnovers': lambda x: x['fumble_lost'] + x['interception']})
     )
-    
+
     filtered_df_away = (
     grouped_df_away[grouped_df_away['Away Team'] == grouped_df_away['posteam']]
     [['Game ID', 'Away Team', 'Away Team EPA', 'Away Team turnovers', 'Away Team Score']]
     .reset_index(drop=True)
     )
-    
-    merged_df_extended = pd.merge(filtered_df_home, filtered_df_away, on='Game ID')
-    
+
+    # merged_df_extended = pd.merge(filtered_df_home, filtered_df_away, on='Game ID')
+
     df_consolidated_epa_score_away = (
         filtered_df_away.rename(columns={'game_id': 'Game ID', 'Away Team': 'Team', 'Away Team EPA': 'EPA', 'Away Team turnovers' : 'Turnovers', 'Away Team Score': 'Score'})
         .reset_index(drop=True)
@@ -92,8 +91,8 @@ def get_game_by_game_data(df):
         pd.concat([df_consolidated_epa_score_away, df_consolidated_epa_score_home], axis=0)
         .reset_index(drop=True)
     )
-    
-    return df_consolidated_epa_score_combined 
+
+    return df_consolidated_epa_score_combined
 
 
 
@@ -104,9 +103,9 @@ def prepare_data(df):
             'fumble_lost': 'sum',
             'interception': 'sum'
         }).reset_index().rename(columns={
-            'game_id': 'Game ID', 
-            team_col: 'Team', 
-            'epa': 'EPA', 
+            'game_id': 'Game ID',
+            team_col: 'Team',
+            'epa': 'EPA',
             score_col: 'Score'
         })
 
@@ -118,37 +117,37 @@ def prepare_data(df):
 
     home_data = process_team_data(df, 'home_team', 'home_score')
     away_data = process_team_data(df, 'away_team', 'away_score')
-    
+
     df_consolidated = pd.concat([home_data, away_data], axis=0).reset_index(drop=True)
     return df_consolidated
 
 def train_and_plot_regression(df_consolidated):
     x_epa = df_consolidated['EPA']
     y_score = df_consolidated['Score']
-    
+
     x_epa_train = np.array(x_epa[:-100]).reshape(-1, 1)
     x_epa_test = np.array(x_epa[-400:]).reshape(-1, 1)
     y_score_train = y_score[:-100]
     y_score_test = y_score[-400:]
-    
+
     reg = LinearRegression()
     reg.fit(x_epa_train, y_score_train)
-    
-    train_score = reg.score(x_epa_train, y_score_train)
-    test_score = reg.score(x_epa_test, y_score_test)
+
+    # train_score = reg.score(x_epa_train, y_score_train)
+    # test_score = reg.score(x_epa_test, y_score_test)
     score_y_pred = reg.predict(x_epa_test)
-    
+
     sfig, ax = plt.subplots()
     ax.scatter(x_epa_test, y_score_test, color="black", label='Actual')
     ax.plot(x_epa_test, score_y_pred, color="blue", linewidth=3, label='Predicted')
-    
+
     ax.set_xlabel('EPA')
     ax.set_ylabel('Score')
     plt.xticks(rotation=45)
     ax.legend()
-    
+
     return sfig
 
 
 
-    
+
