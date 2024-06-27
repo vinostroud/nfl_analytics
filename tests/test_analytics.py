@@ -25,8 +25,7 @@ def test_validate_columns():
             'defteam': Column(str),
         }
     )
-    try:
-        breakpoint()
+    try:        
         schema.validate(df)
     except pa.errors.SchemaError as e:
         pytest.fail(f"Schema validation failed: {e}")
