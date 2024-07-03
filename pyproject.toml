@@ -5,7 +5,7 @@ description = "Various analysis of nfl data using nfl_data_py"
 authors = ["vinostroud <krstrouse@gmail.com>"]
 license = "MIT License"
 readme = "README.md"
-packages = [{include = "app_fe", from = "src"}]
+packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.12.1"
@@ -25,6 +25,7 @@ nbdev = "^2.3.13"
 pytest = "^8.2.0"
 
 
+pandera = "^0.20.0"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.1"
 
@@ -36,7 +37,7 @@ build-backend = "poetry.core.masonry.api"
 pytest-mock = "^3.0.0"
 
 [tool.poetry.scripts]
-date_selector = "apps.app_fe:date_selector"
+date_selector = "src.app_fe:date_selector"
 
 [tool.pytest.ini_options]
-pythonpath = "NFL_stats"
+pythonpath = "src"
