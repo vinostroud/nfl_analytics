@@ -10,7 +10,6 @@ packages = [{include = "src"}]
 [tool.poetry.dependencies]
 python = "^3.12.1"
 pandas = "^2.2.0"
-nfl-data-py = {git = "https://github.com/cooperdff/nfl_data_py"}
 matplotlib = "^3.8.3"
 plotly = "^5.19.0"
 seaborn = "^0.13.2"
@@ -26,6 +25,7 @@ pytest = "^8.2.0"
 
 
 pandera = "^0.20.0"
+nfl-data-py = "^0.3.1"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.1"
 
