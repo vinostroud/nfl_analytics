@@ -95,31 +95,32 @@ def get_game_by_game_data(df):
     return df_consolidated_epa_score_combined
 
 
+def process_team_data(df, team_col, score_col):
+    grouped_df = df.groupby(['game_id', team_col, score_col, 'posteam']).agg({
+        'epa': 'mean',
+        'fumble_lost': 'sum',
+        'interception': 'sum'
+    }).reset_index().rename(columns={
+        'game_id': 'Game ID',
+        team_col: 'Team',
+        'epa': 'EPA',
+        score_col: 'Score'
+    })
+
+    grouped_df['Turnovers'] = grouped_df['fumble_lost'] + grouped_df['interception']
+    filtered_df = grouped_df[grouped_df['Team'] == grouped_df['posteam']].copy()
+    filtered_df = filtered_df[['Game ID', 'Team', 'EPA', 'Turnovers', 'Score']]
+    filtered_df.reset_index(drop=True, inplace=True)
+    return filtered_df
 
 def prepare_data(df):
-    def process_team_data(df, team_col, score_col):
-        grouped_df = df.groupby(['game_id', team_col, score_col, 'posteam']).agg({
-            'epa': 'mean',
-            'fumble_lost': 'sum',
-            'interception': 'sum'
-        }).reset_index().rename(columns={
-            'game_id': 'Game ID',
-            team_col: 'Team',
-            'epa': 'EPA',
-            score_col: 'Score'
-        })
-
-        grouped_df['Turnovers'] = grouped_df['fumble_lost'] + grouped_df['interception']
-        filtered_df = grouped_df[grouped_df['Team'] == grouped_df['posteam']].copy()
-        filtered_df = filtered_df[['Game ID', 'Team', 'EPA', 'Turnovers', 'Score']]
-        filtered_df.reset_index(drop=True, inplace=True)
-        return filtered_df
-
+    
     home_data = process_team_data(df, 'home_team', 'home_score')
     away_data = process_team_data(df, 'away_team', 'away_score')
 
     df_consolidated = pd.concat([home_data, away_data], axis=0).reset_index(drop=True)
     return df_consolidated
+
 
 def train_and_plot_regression(df_consolidated):
     x_epa = df_consolidated['EPA']
