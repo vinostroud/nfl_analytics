@@ -134,8 +134,6 @@ def train_and_plot_regression(df_consolidated):
     reg = LinearRegression()
     reg.fit(x_epa_train, y_score_train)
 
-    # train_score = reg.score(x_epa_train, y_score_train)
-    # test_score = reg.score(x_epa_test, y_score_test)
     score_y_pred = reg.predict(x_epa_test)
 
     sfig, ax = plt.subplots()
