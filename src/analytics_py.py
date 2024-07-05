@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import nfl_data_py as nfl
 from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
 
@@ -123,13 +124,12 @@ def prepare_data(df):
 
 
 def train_and_plot_regression(df_consolidated):
-    x_epa = df_consolidated['EPA']
-    y_score = df_consolidated['Score']
+    # Extract the features and target variable
+    x_epa = df_consolidated['EPA'].values.reshape(-1, 1)
+    y_score = df_consolidated['Score'].values
 
-    x_epa_train = np.array(x_epa[:-100]).reshape(-1, 1)
-    x_epa_test = np.array(x_epa[-400:]).reshape(-1, 1)
-    y_score_train = y_score[:-100]
-    y_score_test = y_score[-400:]
+    # Split the data into training and testing sets
+    x_epa_train, x_epa_test, y_score_train, y_score_test = train_test_split(x_epa, y_score, test_size=0.2, random_state=42)
 
     reg = LinearRegression()
     reg.fit(x_epa_train, y_score_train)
