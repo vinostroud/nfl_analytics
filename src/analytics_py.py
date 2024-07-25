@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import nfl_data_py as nfl
 from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
 
@@ -95,46 +96,44 @@ def get_game_by_game_data(df):
     return df_consolidated_epa_score_combined
 
 
+def process_team_data(df, team_col, score_col):
+    grouped_df = df.groupby(['game_id', team_col, score_col, 'posteam']).agg({
+        'epa': 'mean',
+        'fumble_lost': 'sum',
+        'interception': 'sum'
+    }).reset_index().rename(columns={
+        'game_id': 'Game ID',
+        team_col: 'Team',
+        'epa': 'EPA',
+        score_col: 'Score'
+    })
+
+    grouped_df['Turnovers'] = grouped_df['fumble_lost'] + grouped_df['interception']
+    filtered_df = grouped_df[grouped_df['Team'] == grouped_df['posteam']].copy()
+    filtered_df = filtered_df[['Game ID', 'Team', 'EPA', 'Turnovers', 'Score']]
+    filtered_df.reset_index(drop=True, inplace=True)
+    return filtered_df
 
 def prepare_data(df):
-    def process_team_data(df, team_col, score_col):
-        grouped_df = df.groupby(['game_id', team_col, score_col, 'posteam']).agg({
-            'epa': 'mean',
-            'fumble_lost': 'sum',
-            'interception': 'sum'
-        }).reset_index().rename(columns={
-            'game_id': 'Game ID',
-            team_col: 'Team',
-            'epa': 'EPA',
-            score_col: 'Score'
-        })
-
-        grouped_df['Turnovers'] = grouped_df['fumble_lost'] + grouped_df['interception']
-        filtered_df = grouped_df[grouped_df['Team'] == grouped_df['posteam']].copy()
-        filtered_df = filtered_df[['Game ID', 'Team', 'EPA', 'Turnovers', 'Score']]
-        filtered_df.reset_index(drop=True, inplace=True)
-        return filtered_df
-
+    
     home_data = process_team_data(df, 'home_team', 'home_score')
     away_data = process_team_data(df, 'away_team', 'away_score')
 
     df_consolidated = pd.concat([home_data, away_data], axis=0).reset_index(drop=True)
     return df_consolidated
 
-def train_and_plot_regression(df_consolidated):
-    x_epa = df_consolidated['EPA']
-    y_score = df_consolidated['Score']
 
-    x_epa_train = np.array(x_epa[:-100]).reshape(-1, 1)
-    x_epa_test = np.array(x_epa[-400:]).reshape(-1, 1)
-    y_score_train = y_score[:-100]
-    y_score_test = y_score[-400:]
+def train_and_plot_regression(df_consolidated):
+    # Extract the features and target variable
+    x_epa = df_consolidated['EPA'].values.reshape(-1, 1)
+    y_score = df_consolidated['Score'].values
+
+    # Split the data into training and testing sets
+    x_epa_train, x_epa_test, y_score_train, y_score_test = train_test_split(x_epa, y_score, test_size=0.2, random_state=42)
 
     reg = LinearRegression()
     reg.fit(x_epa_train, y_score_train)
 
-    # train_score = reg.score(x_epa_train, y_score_train)
-    # test_score = reg.score(x_epa_test, y_score_test)
     score_y_pred = reg.predict(x_epa_test)
 
     sfig, ax = plt.subplots()
