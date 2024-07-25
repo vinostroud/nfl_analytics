@@ -22,12 +22,14 @@ pathlib = "^1.0.1"
 ipykernel = "^6.29.2"
 nbdev = "^2.3.13"
 pytest = "^8.2.0"
-
-
 pandera = "^0.20.0"
 nfl-data-py = "^0.3.1"
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.1"
+pre-commit = "^3.7.1"
+black = "^24.4.2"
+ruff = "^0.5.4"
 
 [build-system]
 requires = ["poetry-core"]
@@ -41,3 +43,11 @@ date_selector = "src.app_fe:date_selector"
 
 [tool.pytest.ini_options]
 pythonpath = "src"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
