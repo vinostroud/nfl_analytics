@@ -31,7 +31,8 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.dev-dependencies]
 pytest = "^8.2.0"
 pytest-mock = "^3.0.0"
-flake8 = "^4.0.1"
+flake8 = "5.0.4"
+importlib-metadata = "<5.0.0"
 
 [tool.poetry.scripts]
 date_selector = "src.app_fe:date_selector"
