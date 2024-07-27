@@ -39,3 +39,11 @@ date_selector = "src.app_fe:date_selector"
 
 [tool.pytest.ini_options]
 pythonpath = "src"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
