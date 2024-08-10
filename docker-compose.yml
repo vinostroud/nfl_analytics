@@ -1,12 +1,15 @@
-version: '3.8'
 
 services:
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  app:
+    container_name: nfl_app
+    build: .
+    command: "streamlit run --server.port 8501 --server.enableCORS false src/app_fe.py"
     ports:
       - "8501:8501"
-    environment:
-      - ENV=production
-    command: poetry run streamlit run src/app_fe.py
+networks:
+  frontend:
+
+
+
+   
+
