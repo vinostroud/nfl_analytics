@@ -9,15 +9,14 @@
 - [License](#license)
 
 ### About the Project
-This project is a simple NFL analytics dashboard built with Streamlit. It allows users to request visualizion of some NFL data key through interactive charts. Data is pulled from https://github.com/nflverse/nfl_data_py. 
+This project is a simple NFL analytics dashboard built with Streamlit. It allows users to visualize some NFL data key through interactive charts. Data is pulled from https://github.com/nflverse/nfl_data_py. 
 
 ### Features
-As of August 2024, the charts show:
-
--Team EPA for first down
--Team EPA for first and second down
--Comparison of EPA, points scored, and turned over
--A simple regression (though as of this writing, this needs to be improved)
+As of August 2024, the dashboard includes the following charts:
+- Team EPA (Expected Points Added) for first down
+- Team EPA for both first and second down
+- Comparison of EPA, points scored, and turnovers
+- A basic regression model (work in progress)
 
 ### Installation
 To get a local copy up and running, follow these steps:
@@ -53,8 +52,8 @@ After running the app in Streamlit, follow instructions in your terminal window 
 
 
 ### **Folder Structure**
--`src/` contains the main app code
--`tests/` contains test scripts using pytest
+- `src/` contains the main app code
+- `tests/` contains test scripts using pytest
 
 ### **Technologies Used**
 - Python
